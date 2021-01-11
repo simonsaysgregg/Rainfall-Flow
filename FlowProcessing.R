@@ -108,3 +108,51 @@ write.csv(minflow, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/min
 write.csv(maxflow, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/maxflow.csv")
 write.csv(avgflow, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/avgflow.csv")
 
+
+
+## Flow Time Series
+## View(avgflow)
+
+## Create Time Series
+## Use in matching observations
+## 'by' 1-min interval
+ts <- seq(ymd_hm("2018-10-01 00:00"), ymd_hm("2020-12-01 10:00"), by = 60) 
+## Make data frame
+ts.df <- data.frame(timestamp=ts)
+##View(ts.df)
+
+ts.df.1 <- ts.df %>%
+  mutate(Date = date(timestamp),
+         hour = hour(timestamp),
+         minute = minute(timestamp),
+         time = paste(hour, minute, sep = ":"))
+
+## Combine month year columns
+y <- year(ts.df.1$timestamp)
+m <- month(ts.df.1$timestamp)
+
+ts.df.1$Datematch <- as.yearmon(paste(y, m), "%Y %m")
+##View(ts.df.1)
+
+## Flow file
+
+timeseries <- ts.df.1 %>%
+  select(Date,
+         time,
+         Datematch) 
+
+colnames(timeseries) <- c("Date1", "time", "Date")
+
+timeseries1 <- timeseries %>%
+  left_join(avgflow, by = "Date")
+View(timeseries1)
+
+flowfile <- timeseries1 %>%
+  select(Date1,
+         time,
+         cfs)
+colnames(flowfile) <- c("Date", "time", "cfs")
+View(flowfile)
+
+## Write file FLow DS
+write.csv(flowfile, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/AvgFlow_timeseries.csv")

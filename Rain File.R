@@ -127,3 +127,4 @@ rain.sum2$Date <- as.yearmon(paste(rain.sum2$year, rain.sum2$month), "%Y %m")
 rain.sum3 <- rain.sum2 %>%
   select(Date,
          `total (in)`)
+
