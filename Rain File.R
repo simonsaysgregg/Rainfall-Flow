@@ -11,7 +11,8 @@ require("scales")       #
 require("RColorBrewer") # creates nice color schemes
 require("corrplot")     # A graphical display of a correlation matrix between all combinations of variables
 ## Statistical analysis
-##require("stats")        # Lots of stats stuff
+require("statsr")        # Lots of stats stuff
+require("stats")        # Lots of stats stuff
 ## Data management
 require("plyr")         # Allows you t split data structure into groups (pollutant type, location, etc.) and apply function on each group
 require("dplyr")
@@ -29,7 +30,7 @@ require("pls")
 require("stringi")
 require("ggmap")        # Plotting of maps same as you would with ggplot2
 require("maptools")     # Read, write, and handle Shapefiles in R
-require("mapdata")      # Supplemenet to maps package
+require("mapdata")      # Supplement to maps package
 
 ## Create Time Series
 ## Use in matching observations
@@ -41,7 +42,7 @@ ts.df <- data.frame(timestamp=ts)
 
 ## JOIN RAINFALL DATA FROM ROANOKE RAPIDS
 ## Read file CRONOSresults_KRWI_ROANOKE RAPIDS
-rain.DS <- read.csv("C:/KBE/Projects/Caledonia Wetlands/Data/Monitoring/CRONOSresults_KRWI_ROANOKE RAPIDS.csv", skip = 14)
+rain.DS <- read.csv("C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/CRONOSresults_KRWI_ROANOKE RAPIDS.csv", skip = 14)
 ## Rename columns
 colnames(rain.DS) <- c("timestamp", "rain")
 ## Reformat dates
@@ -49,8 +50,8 @@ rain.DS$timestamp <- mdy_hm(rain.DS$timestamp, tz = "GMT")
 ##View(rain)
 ## Join rainfall data
 DS <- left_join(ts.df, rain.DS, by = "timestamp")
-## REOMVE NA
-DS <- na.omit(DS)
+## Convert values to numeric
+DS$rain <- as.numeric(DS$rain)
 ##View(DS)
 
 ## CLEAN DATASET
@@ -62,8 +63,15 @@ DS.sub <- subset(DS.sub, rain != "Failed QC")
 ggplot(DS.sub, aes(timestamp, rain))+
   geom_point()
 
+DS.sub2 <- subset(DS.sub, rain > 0)
+##View(DS.sub2)
+
+## Plot
+ggplot(DS.sub2, aes(timestamp, rain))+
+  geom_point()
+
 ## Monthly summarize
-DS.sum <- DS.sub %>%
+DS.sum <- DS.sub2 %>%
   mutate(month = month(timestamp),
          year = year(timestamp))
 
@@ -71,8 +79,38 @@ DS.sum <- DS.sub %>%
 MonAccu18 <- DS.sum %>%
   subset(year == 2018) %>%
   group_by(month) %>%
-  summarise(avg=mean(rain, na.rm = TRUE)) %>%
-  na.omit()
+  summarize(sum = sum(rain, na.rm = TRUE))
 
-View(MonAccu18)
+## Monthly sum 2019
+MonAccu19 <- DS.sum %>%
+  subset(year == 2019) %>%
+  group_by(month) %>%
+  summarize(sum = sum(rain, na.rm = TRUE))
+
+## Monthly sum 2020
+MonAccu20 <- DS.sum %>%
+  subset(year == 2020) %>%
+  group_by(month) %>%
+  summarize(sum = sum(rain, na.rm = TRUE))
+
+##View(MonAccu18)
+##View(MonAccu19)
+##View(MonAccu20)
   
+## Summary Table
+V.month <- c(2018,2018,2018,2019,2019,2019,2019,2019,2019,2019,2019,2019,2019,2019,2019,2020,2020,2020,2020,2020,2020,2020,2020,2020,2020,2020)
+##View(V.month)
+
+rain.sum <- bind_rows(MonAccu18, MonAccu19, MonAccu20)
+##View(rain.sum)
+rain.sum2 <- bind_cols(V.month, rain.sum)
+##View(rain.sum2)
+
+## Rename columns
+colnames(rain.sum2) <- c("year", "month", "total (in)")
+## View(rain.sum2)
+
+## Write file Rainfall Summary
+write.csv(rain.sum2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall_Summary.csv")
+## Write file Rainfall DS
+write.csv(DS.sub2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.csv")
