@@ -110,7 +110,20 @@ rain.sum2 <- bind_cols(V.month, rain.sum)
 colnames(rain.sum2) <- c("year", "month", "total (in)")
 ## View(rain.sum2)
 
+
 ## Write file Rainfall Summary
 write.csv(rain.sum2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall_Summary.csv")
 ## Write file Rainfall DS
 write.csv(DS.sub2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.csv")
+
+
+## Combine month year columns
+y <- rain.sum2$year
+m <- rain.sum2$month
+
+rain.sum2$Date <- as.yearmon(paste(rain.sum2$year, rain.sum2$month), "%Y %m")
+##View(rain.sum2)
+
+rain.sum3 <- rain.sum2 %>%
+  select(Date,
+         `total (in)`)
