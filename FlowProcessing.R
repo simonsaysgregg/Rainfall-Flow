@@ -156,3 +156,98 @@ View(flowfile)
 
 ## Write file FLow DS
 write.csv(flowfile, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/AvgFlow_timeseries.csv")
+
+
+## rAINFALL CONTRIBUTION TO ANNUAL FLOW
+## 48 mONTH dATA
+
+monthly <- read.csv("C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/CRONOSresults_KRWI48.csv", skip = 14)
+## Rename columns
+colnames(monthly) <- c("date", "omit", "rainfall")
+
+## Select
+monthly1 <- monthly %>%
+  select(date,
+         rainfall)
+View(monthly1)
+
+monthly1$date <- my(monthly1$date)
+
+monthly2 <- monthly1 %>%
+  mutate(year = year(date),
+         month = month(date))
+View(monthly2)
+
+## Select
+monthly3 <- monthly2 %>%
+  select(year,
+         month,
+         rainfall)
+View(monthly3)
+
+## Combine month year columns
+y1 <- monthly3$year
+m1 <- monthly3$month
+
+monthly3$Date <- as.yearmon(paste(monthly3$year, monthly3$month), "%Y %m")
+View(monthly3)
+
+## Select
+monthly4 <- monthly3 %>%
+  select(Date,
+         rainfall)
+View(monthly4)
+
+## calculation
+area <- 32.45 + 32.18 + 17.31 + 17.22 + 16.98 + 17.5
+acft_to_gal <- (43560 * 7.481)/(10^7)
+est_acc <- monthly4 %>%
+  mutate(acc = ((area * rainfall)/12)*acft_to_gal)
+View(est_acc)
+
+## read avg flow
+aveflow <- read.csv("C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/avgflow.csv")
+View(aveflow)
+
+## Conversion of ave flow to MGD
+cfs_to_MGD <- 0.646317
+flowavg <- aveflow %>%
+  select(Date,
+         cfs) %>%
+  mutate(MGD = cfs * cfs_to_MGD)
+View(flowavg)
+
+flowavg$Date <- my(flowavg$Date)
+
+flowavg <- flowavg %>%
+  mutate(year = year(Date),
+         month = month(Date))
+View(flowavg)
+
+
+## Combine month year columns
+y2 <- flowavg$year
+m2 <- flowavg$month
+
+flowavg$Date <- as.yearmon(paste(y2, m2), "%Y %m")
+View(flowavg)
+
+
+## MGD to Monthly flow MG
+days <- c(31,30,31,31,28,31,30,31,30,31,31,30,31,30,31,31,29,31,30,31,30,31,31,30,31,30)
+flowavg$days <- days
+monthlyflow <- flowavg %>%
+  mutate(MG = days * MGD) %>%
+  select(Date,
+         MG)
+View(monthlyflow)
+
+flow_cont <- est_acc %>%
+  left_join(monthlyflow, by = "Date") %>%
+  subset(!is.na(MG)) %>%
+  mutate(percent = (acc/MG)*100 )
+View(flow_cont)
+
+
+## write
+write.csv(flow_cont, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall_Contribution.csv")
