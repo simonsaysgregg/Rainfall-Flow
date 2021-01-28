@@ -41,7 +41,7 @@ y <- WQ.raw$Year
 m <- WQ.raw$Month
 
 WQ.raw$Date <- as.yearmon(paste(y, m), "%Y %m")
-View(WQ.raw)
+#View(WQ.raw)
 
 ## SELECT COLUMNS FOR USE
 WQ.working <- WQ.raw %>%
@@ -52,23 +52,36 @@ WQ.working <- WQ.raw %>%
          Value,
          Cell.Type)
 
+rain.acc <- rain.sum2 %>%
+  select(Date,
+         `total (in)`)
+#View(rain.acc)
+colnames(rain.acc) <- c("Date", "Total")
 
+WQ.working <- WQ.working %>%
+  left_join(rain.acc, by = "Date")
+#View(WQ.working)
 
 ## SUBSET FC PARAMETERS FOR PLOTTING
 FC <- WQ.working %>%
   subset(Param.Class == "Bacteriological")
-View(FC)
+#View(FC)
 
 ## MELT
 FC.short <- FC %>%
   select(Date,
          Value,
-         Cell.Type)
-View(FC.short)
+         Cell.Type,
+         Total)
+#View(FC.short)
 
 ## Plot
 ggplot(FC.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_point()+
+  geom_line(aes(y = Total * 250, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 250, name = "Rainfall Total (in)"))+
+  geom_hline(aes(yintercept = 400, linetype = "Daily Maximum"))+
+  geom_hline(aes(yintercept = 200, linetype = "Monthly Average"))+
   ggtitle("Fecal Coliform")+
   labs(y = "#/100mL", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -76,18 +89,22 @@ ggplot(FC.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET GI PARAMETERS FOR PLOTTING
 GI <- WQ.working %>%
   subset(Param.Class == "General Inorganic")
-View(GI)
+#View(GI)
 
 ## MELT
 GI.short <- GI %>%
   select(Date,
          Value,
-         Cell.Type)
-View(GI.short)
+         Cell.Type,
+         Total)
+#View(GI.short)
 
 ## Plot
 ggplot(GI.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_line()+
+  geom_line(aes(y = Total * 5, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 5, name = "Rainfall Total (in)"))+
+  geom_hline(aes(yintercept = 28, linetype = "Daily Maximum"))+
   ggtitle("General Inorganic - Cholrine Residual")+
   labs(y = "ug/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -95,18 +112,23 @@ ggplot(GI.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET OG PARAMETERS FOR PLOTTING
 OG <- WQ.working %>%
   subset(Parameter == "00556 - Oil & Grease")
-View(OG)
+#View(OG)
 
 ## MELT
 OG.short <- OG %>%
   select(Date,
          Value,
-         Cell.Type)
-View(OG.short)
+         Cell.Type,
+         Total)
+#View(OG.short)
 
 ## Plot
 ggplot(OG.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_point()+
+  geom_line(aes(y = Total * 5, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 5, name = "Rainfall Total (in)"))+
+  geom_hline(aes(yintercept = 60, linetype = "Daily Maximum"))+
+  geom_hline(aes(yintercept = 30, linetype = "Monthly Average"))+
   ggtitle("General Organic - Oil & Grease")+
   labs(y = "mg/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -114,18 +136,23 @@ ggplot(OG.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET TN PARAMETERS FOR PLOTTING
 TN <- WQ.working %>%
   subset(Parameter == "CO600 - Nitrogen, Total - Concentration")
-View(TN)
+#View(TN)
 
 ## MELT
 TN.short <- TN %>%
   select(Date,
          Value,
-         Cell.Type)
-View(TN.short)
+         Cell.Type,
+         Total)
+#View(TN.short)
 
 ## Plot
 ggplot(TN.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_point()+
+  geom_line(aes(y = Total * 5, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 5, name = "Rainfall Total (in)"))+
+  #geom_hline(aes(yintercept = 60, linetype = "Daily Maximum"))+
+  #geom_hline(aes(yintercept = 30, linetype = "Monthly Average"))+
   ggtitle("Total Nitrogen")+
   labs(y = "mg/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -134,18 +161,23 @@ ggplot(TN.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET NH3 PARAMETERS FOR PLOTTING
 NH3 <- WQ.working %>%
   subset(Parameter == "CO610 - Nitrogen, Ammonia Total (as N) - Concentration")
-View(NH3)
+#View(NH3)
 
 ## MELT
 NH3.short <- NH3 %>%
   select(Date,
          Value,
-         Cell.Type)
-View(NH3.short)
+         Cell.Type,
+         Total)
+#View(NH3.short)
 
 ## Plot
 ggplot(NH3.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_line()+
+  geom_line(aes(y = Total * 2, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 2, name = "Rainfall Total (in)"))+
+  #geom_hline(aes(yintercept = 60, linetype = "Daily Maximum"))+
+  #geom_hline(aes(yintercept = 30, linetype = "Monthly Average"))+
   ggtitle("Ammonia Nitrogen")+
   labs(y = "mg/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -173,18 +205,23 @@ ggplot(TP.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET BOD PARAMETERS FOR PLOTTING
 BOD <- WQ.working %>%
   subset(Parameter == "CO310 - BOD, 5-Day (20 Deg. C) - Concentration")
-View(BOD)
+#View(BOD)
 
 ## MELT
 BOD.short <- BOD %>%
   select(Date,
          Value,
-         Cell.Type)
-View(BOD.short)
+         Cell.Type,
+         Total)
+#View(BOD.short)
 
 ## Plot
 ggplot(BOD.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_line()+
+  geom_line(aes(y = Total * 5, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 5, name = "Rainfall Total (in)"))+
+  geom_hline(aes(yintercept = 45, linetype = "Daily Maximum"))+
+  geom_hline(aes(yintercept = 30, linetype = "Monthly Average"))+
   ggtitle("Biochemical Oxygen Demand")+
   labs(y = "mg/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
@@ -192,18 +229,23 @@ ggplot(BOD.short, aes(x = Date, y = Value, color = Cell.Type))+
 ## SUBSET TSS PARAMETERS FOR PLOTTING
 TSS <- WQ.working %>%
   subset(Parameter == "CO530 - Solids, Total Suspended - Concentration")
-View(TSS)
+#View(TSS)
 
 ## MELT
 TSS.short <- TSS %>%
   select(Date,
          Value,
-         Cell.Type)
-View(TSS.short)
+         Cell.Type,
+         Total)
+#View(TSS.short)
 
 ## Plot
 ggplot(TSS.short, aes(x = Date, y = Value, color = Cell.Type))+
   geom_line()+
+  geom_line(aes(y = Total * 12, color = "Rainfall Total (in)"))+
+  scale_y_continuous(sec.axis = sec_axis(~. / 12, name = "Rainfall Total (in)"))+
+  geom_hline(aes(yintercept = 135, linetype = "Daily Maximum"))+
+  geom_hline(aes(yintercept = 90, linetype = "Monthly Average"))+
   ggtitle("Total Suspended Solid")+
   labs(y = "mg/L", x = "Date")+
   theme(legend.position = "bottom", legend.title = element_blank(), plot.title = element_text(hjust = 0.5))
