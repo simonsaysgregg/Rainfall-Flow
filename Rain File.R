@@ -123,6 +123,39 @@ write.csv(DS.sub2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rai
 ## Write file Rainfall DS
 write.csv(DS.sub3, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall2.csv")
 
+## Using DS & DS.sub to make complete time series with constant increment 
+## Create Time Series
+## Use in matching observations
+## 'by' 1-min interval
+ts2 <- seq(ymd_hm("2018-10-01 00:00"), ymd_hm("2020-12-01 10:00"), by = 60) 
+## Make data frame
+ts2.df <- data.frame(timestamp=ts)
+##View(ts2.df)
+
+rainfall.ts <- ts2.df %>%
+  left_join(DS.sub3, by = "timestamp") %>%
+  select(timestamp,
+         rain) %>%
+  mutate(rain = coalesce(rain, 0),
+         Date = date(timestamp),
+         Hour = hour(timestamp),
+         Min = minute(timestamp))
+
+## reformat hours:mins
+rainfall.ts$Time <- format(as.POSIXlt(rainfall.ts$timestamp, format="%d/%m/%Y %H:%M"), "%H:%M")
+
+rainfall.ts2 <- rainfall.ts %>%
+  select(Date,
+         Time,
+         rain)
+
+#View(rainfall.ts2)
+
+
+
+## Write file Rainfall time series
+write.csv(rainfall.ts2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.Timeseries.csv")
+
 
 ## Combine month year columns
 y <- rain.sum2$year
