@@ -127,9 +127,9 @@ write.csv(DS.sub3, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rai
 ## Create Time Series
 ## Use in matching observations
 ## 'by' 1-min interval
-ts2 <- seq(ymd_hm("2018-10-01 00:00"), ymd_hm("2020-12-01 10:00"), by = 60) 
+ts2 <- seq(ymd_hm("2018-10-01 00:53"), ymd_hm("2020-12-01 10:53"), by = 3600) 
 ## Make data frame
-ts2.df <- data.frame(timestamp=ts)
+ts2.df <- data.frame(timestamp=ts2)
 ##View(ts2.df)
 
 rainfall.ts <- ts2.df %>%
@@ -154,7 +154,7 @@ rainfall.ts2 <- rainfall.ts %>%
 
 
 ## Write file Rainfall time series
-write.csv(rainfall.ts2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.Timeseries.csv")
+write.csv(rainfall.ts2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.Timeseries.53.csv")
 
 
 ## Combine month year columns
