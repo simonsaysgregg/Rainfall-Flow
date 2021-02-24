@@ -110,11 +110,18 @@ rain.sum2 <- bind_cols(V.month, rain.sum)
 colnames(rain.sum2) <- c("year", "month", "total (in)")
 ## View(rain.sum2)
 
-
+## Isolate observation date and time
+DS.sub3 <- DS.sub2 %>%
+  mutate(Date = date(timestamp),
+        Time = hour(timestamp))
+#View(DS.sub3)
+  
 ## Write file Rainfall Summary
 write.csv(rain.sum2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall_Summary.csv")
 ## Write file Rainfall DS
 write.csv(DS.sub2, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall.csv")
+## Write file Rainfall DS
+write.csv(DS.sub3, "C:/KBE/Projects/Caledonia Wetlands/Data/R/CaledoniaWTLDS/Rainfall2.csv")
 
 
 ## Combine month year columns
